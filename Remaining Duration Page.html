@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Payment Countdown Dashboard</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --green: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            text-align: center;
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            max-width: 850px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        /* Dates Header */
+        .date-display-box {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .date-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .date-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .date-value {
+            font-size: 1.1rem;
+            color: var(--accent);
+            font-weight: 600;
+            margin-top: 0.2rem;
+        }
+
+        /* Progress Bar Styles */
+        .progress-box {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            height: 18px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #38bdf8, #22c55e);
+            width: 0%;
+            transition: width 0.4s ease-out;
+            border-radius: 9999px;
+        }
+
+        /* Money & Interactive Installment Grid */
+        .money-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .money-card {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .money-value {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--green);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .money-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-top: 0.25rem;
+        }
+
+        /* Control Buttons for Installment Count */
+        .count-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .ctrl-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-main);
+            width: 28px;
+            height: 28px;
+            border-radius: 0.3rem;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+        }
+
+        .ctrl-btn:hover {
+            background: var(--accent);
+            color: #000;
+        }
+
+        /* Countdown Grid */
+        .countdown-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .time-box {
+            flex: 1;
+            min-width: 100px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1.2rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .time-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: var(--text-main);
+        }
+
+        .time-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-top: 0.25rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* Unit Selector Buttons */
+        .conversion-btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .mode-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            border-radius: 0.4rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .mode-btn.active {
+            background-color: var(--accent);
+            color: #000;
+            font-weight: 600;
+            border-color: var(--accent);
+        }
+
+        .mode-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Postpone / Delay Control Group */
+        .action-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .postpone-btn {
+            background-color: transparent;
+            color: var(--warning);
+            border: 1px solid var(--warning);
+            padding: 0.65rem 1.25rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .postpone-btn:hover {
+            background-color: var(--warning);
+            color: #000;
+        }
+
+        .reset-btn {
+            background-color: transparent;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            padding: 0.65rem 1.25rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .reset-btn:hover {
+            background-color: var(--danger);
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Loan Payment Countdown</h1>
+
+        <!-- Date Header -->
+        <div class="date-display-box">
+            <div class="date-item">
+                <span class="date-label">Today's Date</span>
+                <span id="current-date-text" class="date-value">--</span>
+            </div>
+            <div class="date-item">
+                <span class="date-label">Target Completion Date</span>
+                <span id="target-date-text" class="date-value">--</span>
+            </div>
+        </div>
+
+        <!-- Progress Bar Section -->
+        <div class="progress-box">
+            <div class="progress-header">
+                <span>Overall Journey Progress</span>
+                <span id="progress-percent">0.00%</span>
+            </div>
+            <div class="progress-container">
+                <div id="progress-bar" class="progress-fill"></div>
+            </div>
+        </div>
+
+        <!-- Money & Interactive Installment Grid -->
+        <div class="money-grid">
+            <div class="money-card">
+                <div class="count-controls">
+                    <button class="ctrl-btn" onclick="adjustPaidCount(-1)">-</button>
+                    <div id="installments-count" class="money-value" style="color: var(--accent);">0 / 48</div>
+                    <button class="ctrl-btn" onclick="adjustPaidCount(1)">+</button>
+                </div>
+                <div class="money-label">Installments Paid</div>
+            </div>
+            <div class="money-card">
+                <div id="money-paid" class="money-value">0.00 AED</div>
+                <div class="money-label">Total Amount Paid</div>
+            </div>
+            <div class="money-card">
+                <div id="money-remaining" class="money-value" style="color: #f8fafc;">0.00 AED</div>
+                <div class="money-label">Total Amount Remaining</div>
+            </div>
+        </div>
+
+        <!-- Conversion Mode Buttons -->
+        <div class="conversion-btn-group">
+            <button class="mode-btn active" onclick="setConversionMode('standard', event)">Years / Months / Days</button>
+            <button class="mode-btn" onclick="setConversionMode('months', event)">Total Months</button>
+            <button class="mode-btn" onclick="setConversionMode('weeks', event)">Total Weeks</button>
+            <button class="mode-btn" onclick="setConversionMode('days', event)">Total Days</button>
+        </div>
+
+        <!-- Countdown Display -->
+        <div id="countdown-container" class="countdown-row"></div>
+
+        <!-- Delay Controls (Postpone / Reduce / Reset) -->
+        <div class="action-group">
+            <button class="postpone-btn" onclick="adjustPostponedMonths(-1)">Reduce 1 Month (-1 Month)</button>
+            <button class="postpone-btn" onclick="adjustPostponedMonths(1)">Postpone 1 Month (+1 Month)</button>
+            <button class="reset-btn" onclick="resetPostponedMonths()">Reset Date to Original (Feb 2030)</button>
+        </div>
+    </div>
+
+    <script>
+        const totalInstallments = 48;
+        const monthlyInstallment = 12047.17; // Fixed AED
+        const totalLoanAmount = totalInstallments * monthlyInstallment; // Fixed Total 578,264.16 AED
+
+        // Persistent State (Saved locally in your browser)
+        let paidInstallmentsCount = parseInt(localStorage.getItem('loan_paid_count')) || 6; 
+        let postponedMonths = parseInt(localStorage.getItem('loan_postponed_months')) || 0;
+
+        let conversionMode = 'standard';
+
+        function getCalculatedTargetDate() {
+            // Base completion date: Feb 25, 2030 + postponed months
+            const baseTarget = new Date(2030, 1, 25, 12, 0, 0);
+            baseTarget.setMonth(baseTarget.getMonth() + postponedMonths);
+            return baseTarget;
+        }
+
+        function formatDateDisplay(d) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return d.toLocaleDateString('en-US', options);
+        }
+
+        function adjustPaidCount(delta) {
+            paidInstallmentsCount = Math.max(0, Math.min(totalInstallments, paidInstallmentsCount + delta));
+            localStorage.setItem('loan_paid_count', paidInstallmentsCount);
+            updateTimer();
+        }
+
+        function adjustPostponedMonths(delta) {
+            postponedMonths += delta;
+            localStorage.setItem('loan_postponed_months', postponedMonths);
+            updateTimer();
+        }
+
+        function resetPostponedMonths() {
+            postponedMonths = 0;
+            localStorage.setItem('loan_postponed_months', 0);
+            updateTimer();
+        }
+
+        function setConversionMode(mode, event) {
+            conversionMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            updateTimer();
+        }
+
+        function updateTimer() {
+            const now = new Date();
+            const targetDate = getCalculatedTargetDate();
+            const diff = targetDate.getTime() - now.getTime();
+
+            // Header Dates Display
+            document.getElementById('current-date-text').textContent = formatDateDisplay(now);
+            document.getElementById('target-date-text').textContent = formatDateDisplay(targetDate);
+
+            if (diff <= 0) {
+                document.getElementById('countdown-container').innerHTML = `<div class="time-value" style="color: #ef4444; width: 100%;">Target Reached!</div>`;
+                return;
+            }
+
+            // Calculations driven strictly by YOUR manual paid count
+            const remainingInstallments = totalInstallments - paidInstallmentsCount;
+            const percentComplete = (paidInstallmentsCount / totalInstallments) * 100;
+
+            const moneyPaid = paidInstallmentsCount * monthlyInstallment;
+            const moneyRemaining = remainingInstallments * monthlyInstallment;
+
+            document.getElementById('progress-bar').style.width = percentComplete.toFixed(2) + '%';
+            document.getElementById('progress-percent').textContent = percentComplete.toFixed(2) + '%';
+
+            document.getElementById('installments-count').textContent = `${paidInstallmentsCount} / ${totalInstallments}`;
+            document.getElementById('money-paid').textContent = moneyPaid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' AED';
+            document.getElementById('money-remaining').textContent = moneyRemaining.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' AED';
+
+            // Countdown Units Math
+            const secUnit = 1000;
+            const minUnit = secUnit * 60;
+            const hourUnit = minUnit * 60;
+            const dayUnit = hourUnit * 24;
+            const weekUnit = dayUnit * 7;
+            const monthUnit = dayUnit * 30.436875;
+            const yearUnit = dayUnit * 365.2425;
+
+            let datasets = [];
+
+            if (conversionMode === 'standard') {
+                const years = Math.floor(diff / yearUnit);
+                let remainder = diff % yearUnit;
+                const months = Math.floor(remainder / monthUnit);
+                remainder %= monthUnit;
+                const days = Math.floor(remainder / dayUnit);
+
+                datasets = [
+                    { label: 'Years', val: years },
+                    { label: 'Months', val: months },
+                    { label: 'Days', val: days }
+                ];
+            } else if (conversionMode === 'months') {
+                const totalMonths = (diff / monthUnit).toFixed(1);
+                datasets = [{ label: 'Total Months Remaining', val: totalMonths }];
+            } else if (conversionMode === 'weeks') {
+                const totalWeeks = Math.floor(diff / weekUnit);
+                datasets = [{ label: 'Total Weeks Remaining', val: totalWeeks }];
+            } else if (conversionMode === 'days') {
+                const totalDays = Math.floor(diff / dayUnit);
+                datasets = [{ label: 'Total Days Remaining', val: totalDays }];
+            }
+
+            let htmlOutput = '';
+            for (let i = 0; i < datasets.length; i++) {
+                const displayVal = typeof datasets[i].val === 'number' && datasets[i].val < 10 
+                    ? String(datasets[i].val).padStart(2, '0') 
+                    : datasets[i].val;
+
+                htmlOutput += `
+                    <div class="time-box">
+                        <div class="time-value">${displayVal}</div>
+                        <div class="time-label">${datasets[i].label}</div>
+                    </div>
+                `;
+            }
+            document.getElementById('countdown-container').innerHTML = htmlOutput;
+        }
+
+        // Initialize and tick every second
+        updateTimer();
+        setInterval(updateTimer, 1000);
+    </script>
+</body>
+</html>
